@@ -7,6 +7,7 @@ const int interruptPin = 7;
 const int xAxisPin = A0;       // joystick X axis
 const int yAxisPin = A2;       // joystick Y axis
 
+int s_delay = 30;
 int xAxis = 0;    
 int yAxis = 0; 
 
@@ -18,6 +19,7 @@ int printCount = 0;
 int printAfterLoops = 1;
 
 int buttonState = LOW;
+int buttonLastState = LOW;
 int interruptState = LOW; 
 
 // Note: The TX LED was not so lucky, we'll need to use pre-defined
@@ -42,14 +44,13 @@ void loop(){
 
     if(interruptState == HIGH){
       Serial.println("Interrupted State");
-      delay(250);  
+      s_delay = 150;
+    }else{
+        interruptState = digitalRead(interruptPin);
+        mouseControl();        
     }
 
-    if(interruptState == LOW){
-        interruptState = digitalRead(interruptPin);
-        mouseControl();
-        heartBeat();
-    }
+    heartBeat();
 }
 
 void mouseControl(){
@@ -67,22 +68,27 @@ void mouseControl(){
     mousePress();
     if(callMouseMove){
         Mouse.move(xAxis, yAxis, 0);
-        printValues();
+      //  printValues();
     }
 }
 
 void mousePress(){
+  buttonLastState = buttonState;
   buttonState = !digitalRead(switchPin);
 
-  if (digitalRead(buttonState) == HIGH) {
-    // if the mouse is not pressed, press it:
-    if (!Mouse.isPressed(MOUSE_LEFT)) {
-      Mouse.press(MOUSE_LEFT);
-    }
-  }else {
-    // if the mouse is pressed, release it:
-    if (Mouse.isPressed(MOUSE_LEFT)) {
-      Mouse.release(MOUSE_LEFT);
+  // Serial.print("  buttonState: ");
+  // Serial.print(buttonState);   
+  // Serial.print("  buttonLastState: ");
+  // Serial.println(buttonLastState);   
+
+  if(buttonState != buttonLastState){
+    Serial.print("Mouse Pressed: "); 
+    if (buttonState == HIGH) {
+        Serial.println("Yes");
+        Mouse.press(MOUSE_LEFT);
+    }else {
+        Serial.println("No");
+        Mouse.release(MOUSE_LEFT);
     }
   }
 }
@@ -109,18 +115,15 @@ void printValues(){
         Serial.print("A0: ");
         Serial.print(xAxis);
         Serial.print("  A1: ");
-        Serial.print(yAxis);   
-        Serial.print("  Switch: "); 
-        Serial.println(buttonState);
+        Serial.println(yAxis);   
+
     }
 }
 
 void heartBeat(){
-    // set the RX LED ON
     digitalWrite(RXLED, LOW);   
-    delay(75);              
+    delay(s_delay);              
 
-    // set the RX LED OFF
     digitalWrite(RXLED, HIGH);    
-    delay(75);              
+    delay(s_delay);              
 }
