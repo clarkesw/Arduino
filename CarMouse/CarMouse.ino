@@ -1,5 +1,6 @@
 #include "Mouse.h"
 
+const char version[] = "build "  __DATE__ " " __TIME__;
 const int RXLED = 17;  // The RX LED has a defined Arduino pin
 const int highPin = 9;
 const int switchPin = 5;
@@ -35,7 +36,8 @@ void setup(){
     pinMode(interruptPin, INPUT);  // Set as HIGH
     
     Serial.begin(9600);             //This pipes to the serial monitor
-    Serial.println("Initialize Serial Monitor");
+    Serial.print("CarMouse Version: ");
+    Serial.print(version);
 
     Mouse.begin();
 }
@@ -74,22 +76,18 @@ void mouseControl(){
 
 void mousePress(){
   buttonLastState = buttonState;
-  buttonState = !digitalRead(switchPin);
-
-  // Serial.print("  buttonState: ");
-  // Serial.print(buttonState);   
-  // Serial.print("  buttonLastState: ");
-  // Serial.println(buttonLastState);   
+  buttonState = !digitalRead(switchPin);  
 
   if(buttonState != buttonLastState){
-    Serial.print("Mouse Pressed: "); 
+  //  Serial.print("Mouse Pressed: "); 
     if (buttonState == HIGH) {
-        Serial.println("Yes");
+   //     Serial.println("Yes");
         Mouse.press(MOUSE_LEFT);
     }else {
-        Serial.println("No");
+   //     Serial.println("No");
         Mouse.release(MOUSE_LEFT);
     }
+    // printPressValues();
   }
 }
 
@@ -107,7 +105,7 @@ int readAxis(int thisAxis){
     return distance;
 }
 
-void printValues(){
+void printMoveValues(){
     printCount++;
 
     if(printCount == printAfterLoops){
@@ -116,8 +114,14 @@ void printValues(){
         Serial.print(xAxis);
         Serial.print("  A1: ");
         Serial.println(yAxis);   
-
     }
+}
+
+void printPressValues(){
+        Serial.print("  buttonState: ");
+        Serial.print(buttonState);   
+        Serial.print("  buttonLastState: ");
+        Serial.println(buttonLastState); 
 }
 
 void heartBeat(){
